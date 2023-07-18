@@ -1,92 +1,92 @@
 ﻿Imports System.Text.RegularExpressions
 Imports System.Web.Script.Serialization
 
-Public Module Helper
-    ''' <summary>
-    ''' Outputs Structure to Jason(JavaScriptSerializer)
-    ''' </summary>
-    ''' <returns></returns>
-    <Runtime.CompilerServices.Extension()>
-    Public Function ToJson(ByRef iObject As Object) As String
-        Dim Converter As New JavaScriptSerializer
-        Return Converter.Serialize(iObject)
-    End Function
-    Function CalculateWordOverlap(tokens1 As String(), tokens2 As String()) As Integer
-        Dim overlap As Integer = 0
+Namespace Basic_NLP
+    Public Module Helper
+        ''' <summary>
+        ''' Outputs Structure to Jason(JavaScriptSerializer)
+        ''' </summary>
+        ''' <returns></returns>
+        <Runtime.CompilerServices.Extension()>
+        Public Function ToJson(ByRef iObject As Object) As String
+            Dim Converter As New JavaScriptSerializer
+            Return Converter.Serialize(iObject)
+        End Function
+        Function CalculateWordOverlap(tokens1 As String(), tokens2 As String()) As Integer
+            Dim overlap As Integer = 0
 
-        ' Compare each token in sentence 1 with tokens in sentence 2
-        For Each token1 As String In tokens1
-            For Each token2 As String In tokens2
-                ' If the tokens match, increment the overlap count
-                If token1.ToLower() = token2.ToLower() Then
-                    overlap += 1
-                    Exit For ' No need to check further tokens in sentence 2
+            ' Compare each token in sentence 1 with tokens in sentence 2
+            For Each token1 As String In tokens1
+                For Each token2 As String In tokens2
+                    ' If the tokens match, increment the overlap count
+                    If token1.ToLower() = token2.ToLower() Then
+                        overlap += 1
+                        Exit For ' No need to check further tokens in sentence 2
+                    End If
+                Next
+            Next
+
+            Return overlap
+        End Function
+        Function DetermineEntailment(overlap As Integer) As Boolean
+            ' Set a threshold for entailment
+            Dim threshold As Integer = 2
+
+            ' Determine entailment based on overlap
+            Return overlap >= threshold
+        End Function
+        Public Function CalculateCosineSimilarity(sentence1 As String, sentence2 As String) As Double
+            ' Calculate the cosine similarity between two sentences
+            Dim words1 As String() = sentence1.Split(" "c)
+            Dim words2 As String() = sentence2.Split(" "c)
+
+            Dim intersection As Integer = words1.Intersect(words2).Count()
+            Dim similarity As Double = intersection / Math.Sqrt(words1.Length * words2.Length)
+            Return similarity
+        End Function
+
+        Public Sub Program_CALC_SIMULARITY()
+            ' Example sentences
+            Dim sentence1 As String = "The cat is on the mat."
+            Dim sentence2 As String = "The mat has a cat."
+
+            ' Tokenize the sentences
+            Dim tokens1 As String() = sentence1.Split(" "c)
+            Dim tokens2 As String() = sentence2.Split(" "c)
+
+            ' Calculate the word overlap
+            Dim overlap As Integer = CalculateWordOverlap(tokens1, tokens2)
+
+            ' Determine entailment based on overlap
+            Dim entailment As Boolean = DetermineEntailment(overlap)
+
+            ' Display the results
+            Console.WriteLine("Sentence 1: " & sentence1)
+            Console.WriteLine("Sentence 2: " & sentence2)
+            Console.WriteLine("Word Overlap: " & overlap)
+            Console.WriteLine("Entailment: " & entailment)
+            Console.ReadLine()
+        End Sub
+    End Module
+    Public Structure Entity
+        Public Property EndIndex As Integer
+        Public Property StartIndex As Integer
+        Public Property Type As String
+        Public Property Value As String
+        Public Shared Function DetectEntitys(ByRef text As String, EntityList As List(Of Entity)) As List(Of Entity)
+            Dim detectedEntitys As New List(Of Entity)()
+
+            ' Perform entity detection logic here
+            For Each item In EntityList
+                If text.Contains(item.Value) Then
+                    detectedEntitys.Add(item)
                 End If
             Next
-        Next
 
-        Return overlap
-    End Function
-    Function DetermineEntailment(overlap As Integer) As Boolean
-        ' Set a threshold for entailment
-        Dim threshold As Integer = 2
+            Return detectedEntitys
+        End Function
+    End Structure
 
-        ' Determine entailment based on overlap
-        Return overlap >= threshold
-    End Function
-    Public Function CalculateCosineSimilarity(sentence1 As String, sentence2 As String) As Double
-        ' Calculate the cosine similarity between two sentences
-        Dim words1 As String() = sentence1.Split(" "c)
-        Dim words2 As String() = sentence2.Split(" "c)
-
-        Dim intersection As Integer = words1.Intersect(words2).Count()
-        Dim similarity As Double = intersection / Math.Sqrt(words1.Length * words2.Length)
-        Return similarity
-    End Function
-
-    Public Sub Program_CALC_SIMULARITY()
-        ' Example sentences
-        Dim sentence1 As String = "The cat is on the mat."
-        Dim sentence2 As String = "The mat has a cat."
-
-        ' Tokenize the sentences
-        Dim tokens1 As String() = sentence1.Split(" "c)
-        Dim tokens2 As String() = sentence2.Split(" "c)
-
-        ' Calculate the word overlap
-        Dim overlap As Integer = CalculateWordOverlap(tokens1, tokens2)
-
-        ' Determine entailment based on overlap
-        Dim entailment As Boolean = DetermineEntailment(overlap)
-
-        ' Display the results
-        Console.WriteLine("Sentence 1: " & sentence1)
-        Console.WriteLine("Sentence 2: " & sentence2)
-        Console.WriteLine("Word Overlap: " & overlap)
-        Console.WriteLine("Entailment: " & entailment)
-        Console.ReadLine()
-    End Sub
-End Module
-Public Structure Entity
-    Public Property EndIndex As Integer
-    Public Property StartIndex As Integer
-    Public Property Type As String
-    Public Property Value As String
-    Public Shared Function DetectEntitys(ByRef text As String, EntityList As List(Of Entity)) As List(Of Entity)
-        Dim detectedEntitys As New List(Of Entity)()
-
-        ' Perform entity detection logic here
-        For Each item In EntityList
-            If text.Contains(item.Value) Then
-                detectedEntitys.Add(item)
-            End If
-        Next
-
-        Return detectedEntitys
-    End Function
-End Structure
-
-Namespace Vocabulary
 
     ''' <summary>
     ''' Corpus Language Model
@@ -1597,5 +1597,4 @@ Namespace Vocabulary
             End Function
         End Class
     End Class
-
 End Namespace
