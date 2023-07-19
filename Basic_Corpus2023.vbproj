@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
-    <RootNamespace>SpydazWebAI_Corpus</RootNamespace>
+    <RootNamespace>SpydazWebAI.Corpus</RootNamespace>
     <AssemblyName>SpydazWebAI.Corpus</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
