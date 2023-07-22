@@ -97,6 +97,99 @@ Namespace Basic_NLP
     ''' 
     ''' </summary>
     Public Class Corpus
+        Public Class iCompare
+
+            Public Shared Function GetDistinctWords(text As String) As HashSet(Of String)
+                ' Split the text into words and return a HashSet of distinct words
+                Dim words() As String = text.Split({" ", ".", ",", ";", ":", "!", "?"}, StringSplitOptions.RemoveEmptyEntries)
+                Dim distinctWords As New HashSet(Of String)(words, StringComparer.OrdinalIgnoreCase)
+
+                Return distinctWords
+            End Function
+            Public Shared Function BuildWordVector(words As HashSet(Of String)) As Dictionary(Of String, Integer)
+                Dim wordVector As New Dictionary(Of String, Integer)
+
+                For Each word As String In words
+                    If wordVector.ContainsKey(word) Then
+                        wordVector(word) += 1
+                    Else
+                        wordVector(word) = 1
+                    End If
+                Next
+
+                Return wordVector
+            End Function
+            '1. Cosine Similarity Calculation:
+            '```vb
+            Public Shared Function ComputeCosineSimilarity(phrase1 As String, phrase2 As String) As Double
+                Dim words1 As HashSet(Of String) = GetDistinctWords(phrase1)
+                Dim words2 As HashSet(Of String) = GetDistinctWords(phrase2)
+
+                Dim wordVector1 As Dictionary(Of String, Integer) = BuildWordVector(words1)
+                Dim wordVector2 As Dictionary(Of String, Integer) = BuildWordVector(words2)
+
+                Dim dotProduct As Integer = ComputeDotProduct(wordVector1, wordVector2)
+                Dim magnitude1 As Double = ComputeVectorMagnitude(wordVector1)
+                Dim magnitude2 As Double = ComputeVectorMagnitude(wordVector2)
+
+                ' Compute the cosine similarity as the dot product divided by the product of magnitudes
+                Dim similarityScore As Double = dotProduct / (magnitude1 * magnitude2)
+
+                Return similarityScore
+            End Function
+            Public Shared Function ComputeDotProduct(vector1 As Dictionary(Of String, Integer), vector2 As Dictionary(Of String, Integer)) As Integer
+                Dim dotProduct As Integer = 0
+
+                For Each word As String In vector1.Keys
+                    If vector2.ContainsKey(word) Then
+                        dotProduct += vector1(word) * vector2(word)
+                    End If
+                Next
+
+                Return dotProduct
+            End Function
+            '2. Jaccard Similarity Calculation:
+            '```vb
+            Public Shared Function ComputeJaccardSimilarity(phrase1 As String, phrase2 As String) As Double
+                Dim words1 As HashSet(Of String) = GetDistinctWords(phrase1)
+                Dim words2 As HashSet(Of String) = GetDistinctWords(phrase2)
+
+                Dim intersectionCount As Integer = words1.Intersect(words2).Count()
+                Dim unionCount As Integer = words1.Count + words2.Count - intersectionCount
+
+                ' Compute the Jaccard Similarity as the ratio of intersection count to union count
+                Dim similarityScore As Double = intersectionCount / unionCount
+
+                Return similarityScore
+            End Function
+            Public Shared Function ComputeSimilarityScore(phrase As String, contextLine As String) As Double
+                ' Here you can implement your own logic for computing the similarity score between the phrase and the context line.
+                ' For simplicity, let's use a basic approach that counts the number of common words between them.
+
+                Dim phraseWords As HashSet(Of String) = GetDistinctWords(phrase)
+                Dim contextWords As HashSet(Of String) = GetDistinctWords(contextLine)
+
+                Dim commonWordsCount As Integer = phraseWords.Intersect(contextWords).Count()
+
+                Dim totalWordsCount As Integer = phraseWords.Count + contextWords.Count
+
+                ' Compute the similarity score as the ratio of common words count to total words count
+                Dim similarityScore As Double = commonWordsCount / totalWordsCount
+
+                Return similarityScore
+            End Function
+            Public Shared Function ComputeVectorMagnitude(vector As Dictionary(Of String, Integer)) As Double
+                Dim magnitude As Double = 0
+
+                For Each count As Integer In vector.Values
+                    magnitude += count * count
+                Next
+
+                magnitude = Math.Sqrt(magnitude)
+
+                Return magnitude
+            End Function
+        End Class
         ''' <summary>
         ''' Used to create NewCorpus - With Or Without a Recognition template
         ''' </summary>
@@ -128,6 +221,126 @@ Namespace Basic_NLP
             End Function
 
         End Class
+        Public Shared Function ExtractSimilarPhrases(text As String, searchPhrase As String, similarityThreshold As Double) As List(Of String)
+            Dim result As New List(Of String)()
+
+            Dim sentences() As String = text.Split({".", "!", "?"}, StringSplitOptions.RemoveEmptyEntries)
+
+            For Each sentence As String In sentences
+                Dim similarityScore As Double = iCompare.ComputeSimilarityScore(searchPhrase, sentence)
+
+                If similarityScore >= similarityThreshold Then
+                    result.Add(sentence)
+                End If
+            Next
+
+            Return result
+        End Function
+        Public Shared Function QueryCorpus(question As String, corpus As List(Of String)) As String
+            Dim maxScore As Double = Double.MinValue
+            Dim bestAnswer As String = ""
+
+            For Each document As String In corpus
+                Dim score As Double = iCompare.ComputeSimilarityScore(question, document)
+
+                If score > maxScore Then
+                    maxScore = score
+                    bestAnswer = document
+                End If
+            Next
+
+            Return bestAnswer
+        End Function
+
+        ''' <summary>
+        ''' Returns phrase and surrounding comments and position
+        ''' </summary>
+        ''' <param name="corpus"></param>
+        ''' <param name="phrase"></param>
+        ''' <returns></returns>
+        Public Shared Function SearchPhraseInCorpus(corpus As List(Of String), phrase As String) As Dictionary(Of String, List(Of String))
+            Dim result As New Dictionary(Of String, List(Of String))()
+
+            For i As Integer = 0 To corpus.Count - 1
+                Dim document As String = corpus(i)
+                Dim lines() As String = document.Split(Environment.NewLine)
+
+                For j As Integer = 0 To lines.Length - 1
+                    Dim line As String = lines(j)
+                    Dim index As Integer = line.IndexOf(phrase, StringComparison.OrdinalIgnoreCase)
+
+                    While index >= 0
+                        Dim context As New List(Of String)()
+
+                        ' Get the surrounding context sentences
+                        Dim startLine As Integer = Math.Max(0, j - 1)
+                        Dim endLine As Integer = Math.Min(lines.Length - 1, j + 1)
+
+                        For k As Integer = startLine To endLine
+                            context.Add(lines(k))
+                        Next
+
+                        ' Add the result to the dictionary
+                        Dim position As String = $"Document: {i + 1}, Line: {j + 1}, Character: {index + 1}"
+                        result(position) = context
+
+                        ' Continue searching for the phrase in the current line
+                        index = line.IndexOf(phrase, index + 1, StringComparison.OrdinalIgnoreCase)
+                    End While
+                Next
+            Next
+
+            Return result
+        End Function
+        ''' <summary>
+        ''' Searches for phrases based on simularity ie same words
+        ''' </summary>
+        ''' <param name="corpus"></param>
+        ''' <param name="phrase"></param>
+        ''' <param name="similarityThreshold"></param>
+        ''' <returns></returns>
+        Public Shared Function SearchPhraseInCorpus(corpus As List(Of String), phrase As String, similarityThreshold As Double) As Dictionary(Of String, List(Of String))
+            Dim result As New Dictionary(Of String, List(Of String))()
+
+            For i As Integer = 0 To corpus.Count - 1
+                Dim document As String = corpus(i)
+                Dim lines() As String = document.Split(Environment.NewLine)
+
+                For j As Integer = 0 To lines.Length - 1
+                    Dim line As String = lines(j)
+                    Dim index As Integer = line.IndexOf(phrase, StringComparison.OrdinalIgnoreCase)
+
+                    While index >= 0
+                        Dim context As New List(Of String)()
+
+                        ' Get the surrounding context sentences
+                        Dim startLine As Integer = Math.Max(0, j - 1)
+                        Dim endLine As Integer = Math.Min(lines.Length - 1, j + 1)
+
+                        For k As Integer = startLine To endLine
+                            Dim contextLine As String = lines(k)
+
+                            ' Compute the similarity score between the context line and the phrase
+                            Dim similarityScore As Double = iCompare.ComputeSimilarityScore(phrase, contextLine)
+
+                            ' Add the context line only if its similarity score exceeds the threshold
+                            If similarityScore >= similarityThreshold Then
+                                context.Add(contextLine)
+                            End If
+                        Next
+
+                        ' Add the result to the dictionary
+                        Dim position As String = $"Document: {i + 1}, Line: {j + 1}, Character: {index + 1}"
+                        result(position) = context
+
+                        ' Continue searching for the phrase in the current line
+                        index = line.IndexOf(phrase, index + 1, StringComparison.OrdinalIgnoreCase)
+                    End While
+                Next
+            Next
+
+            Return result
+        End Function
 
         Public Function ToJson(ByRef iObject As Object) As String
             Dim Converter As New JavaScriptSerializer
