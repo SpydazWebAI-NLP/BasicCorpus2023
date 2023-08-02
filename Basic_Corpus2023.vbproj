@@ -114,5 +114,20 @@
     <None Include="App.config" />
     <None Include="ReadMe.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Text_Corpus\Female.txt" />
+    <Content Include="Text_Corpus\femaleNames.txt" />
+    <Content Include="Text_Corpus\LearnedPredicates.txt" />
+    <Content Include="Text_Corpus\Male.txt" />
+    <Content Include="Text_Corpus\maleNames.txt" />
+    <Content Include="Text_Corpus\negative-words.txt" />
+    <Content Include="Text_Corpus\Nounlist.txt" />
+    <Content Include="Text_Corpus\part-of-speech.txt" />
+    <Content Include="Text_Corpus\positive-words.txt" />
+    <Content Include="Text_Corpus\ProNouns.txt" />
+    <Content Include="Text_Corpus\wordlist.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
