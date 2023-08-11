@@ -8,8 +8,8 @@
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
-    <RootNamespace>SpydazWebAI.Corpus</RootNamespace>
-    <AssemblyName>SpydazWebAI.Corpus</AssemblyName>
+    <RootNamespace>CorpusModelling</RootNamespace>
+    <AssemblyName>SpydazWebAI.CorpusModelling</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -23,7 +23,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>SpydazWebAI.Corpus.xml</DocumentationFile>
+    <DocumentationFile>SpydazWebAI.CorpusModelling.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -33,7 +33,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>SpydazWebAI.Corpus.xml</DocumentationFile>
+    <DocumentationFile>SpydazWebAI.CorpusModelling.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>

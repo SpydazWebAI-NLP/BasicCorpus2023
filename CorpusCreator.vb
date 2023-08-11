@@ -1,9 +1,9 @@
 ﻿Imports System.IO
 Imports System.Text.RegularExpressions
 Imports System.Web.Script.Serialization
+Imports CorpusModelling.Models
+Imports CorpusModelling.Utilitys
 Imports Newtonsoft.Json
-Imports SpydazWebAI.Corpus.Models
-Imports SpydazWebAI.Corpus.Utilitys
 
 Namespace Examples
     Public Module ExampleModels
